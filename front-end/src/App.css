@@ -1,0 +1,5 @@
+body, html {
+    overflow-x: hidden; /* or visible */
+    max-width: 100%;
+  }
+  
