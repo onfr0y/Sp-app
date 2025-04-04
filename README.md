@@ -1,1 +1,1 @@
-# This is my project when i am anticipate at Thammasat Secoondary School
+# This is my project when i am participate at Thammasat Secoondary School
