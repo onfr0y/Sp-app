@@ -1,21 +1,22 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import './App.css';
 
-import TextHeader from './text-header.jsx'
-import SearchBar from './searchbar.jsx'
+// Import pages
+import HomePage from './pages/HomePage.jsx';
+import Posts from './Postfunc.jsx';
+import PostResult from './postresultbox.jsx';
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-   
-      <TextHeader />
-      <SearchBar />
-    </>
-  )
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/posts" element={<Posts />} />
+        <Route path="/results" element={<PostResult posts={[]} />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;
