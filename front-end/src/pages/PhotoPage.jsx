@@ -1,108 +1,108 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 
-// Placeholder SVGs for icons (replace with your preferred icon library or actual SVGs)
-const ArrowLeftIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
-  </svg>
-);
+// --- Icon Components (Placeholders) ---
+const MenuIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>;
 
-const HeartIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
-  </svg>
-);
 
-const ShareIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
-  </svg>
-);
+// --- Main Photo Page Component ---
+const PhotoPage = () => {
 
-const CloseIcon = () => (
- <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3 ml-1 text-gray-600 hover:text-gray-800">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-  </svg>
-);
-
-function PhotoPage() {
-const navigate = useNavigate();
-
-  const handleBack = () => {
-    navigate(-1);
+  // --- Dummy Data (URLs removed from here too, structure kept) ---
+  const featuredImage = {
+    // url: '', // Removed placeholder URL
+    title: 'VEDAS PERCEPTION OF THE ABSTRACT ART.'
   };
 
-  // Placeholder image URLs - replace these
-  const mainImageUrl = "https://via.placeholder.com/600x800/cccccc/000000?text=Main+Image+Placeholder";
-  const relatedImage1Url = "https://via.placeholder.com/300x200/a98d7a/ffffff?text=Related+1";
-  const relatedImage2Url = "https://via.placeholder.com/300x200/87ceeb/ffffff?text=Related+2";
+  const galleryImages = [
+    { id: 1 /*, url: '' */ }, // Removed placeholder URL
+    { id: 2 /*, url: '' */ },
+    { id: 3 /*, url: '' */ },
+    { id: 4 /*, url: '' */ },
+    { id: 5 /*, url: '' */ },
+    { id: 6 /*, url: '' */ },
+  ];
 
+  // --- Event Handlers (Placeholders) ---
+  const handleMenuClick = () => console.log('Menu clicked');
+  const handleCollectionClick = (type) => console.log(`${type} clicked`);
+  const handleImageClick = (idOrUrl = 'featured') => console.log(`Image clicked: ${idOrUrl}`);
+
+
+  // --- Render ---
   return (
-    <div className="max-w-md mx-auto bg-white min-h-screen font-sans">
-      {/* Main Image Section */}
-      <div className="relative">
-        <img
-          src={mainImageUrl}
-          alt="Main content"
-          className="w-full object-cover"
-        />
-        {/* Back Button */}
-        <button
-onClick={handleBack}
-          className="absolute top-4 left-4 bg-gray-800 bg-opacity-60 text-white rounded-full p-2 hover:bg-opacity-80 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50"
-          aria-label="Go back"
-        >
-          <ArrowLeftIcon />
-        </button>
-      </div>
+    // Main container: Light background, full height
+    <div className="bg-white min-h-screen text-black font-sans">
+      {/* Optional: Add max-width and margin-auto for large screens */}
+      <div className="max-w-7xl mx-auto">
 
-      {/* Action Bar Section */}
-      <div className="flex items-center justify-between p-3 space-x-2">
-        {/* Name Tag */}
-        <div className="flex items-center bg-gray-200 rounded-full px-3 py-1 shadow-sm">
-          <span className="text-sm font-medium text-gray-700">Name</span>
-          <button className="ml-1 focus:outline-none" aria-label="Remove tag">
-             <CloseIcon />
+        {/* --- Header --- */}
+        <header className="flex items-center justify-between p-4 md:p-6 border-b border-gray-100">
+          <button onClick={handleMenuClick} aria-label="Open menu">
+            <MenuIcon />
           </button>
-        </div>
+          <nav className="flex items-center space-x-4 md:space-x-6">
+            {/* Using buttons for potential interactivity */}
+            <button
+              onClick={() => handleCollectionClick('New Collection')}
+              className="uppercase font-bold text-sm md:text-base tracking-wider text-black" // Active style
+            >
+              New Collection
+            </button>
+            <button
+              onClick={() => handleCollectionClick('Popular')}
+              className="uppercase font-medium text-sm md:text-base tracking-wider text-gray-400 hover:text-gray-600" // Inactive style
+            >
+              Popular
+            </button>
+          </nav>
+        </header>
 
-        {/* Icon Buttons */}
-        <div className="flex items-center space-x-2">
-          <button
-            className="bg-gray-200 rounded-full p-2 text-gray-600 hover:bg-gray-300 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 shadow-sm"
-            aria-label="Like"
-          >
-            <HeartIcon />
-          </button>
-          <button
-            className="bg-gray-200 rounded-full p-2 text-gray-600 hover:bg-gray-300 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 shadow-sm"
-            aria-label="Share"
-          >
-            <ShareIcon />
-          </button>
-        </div>
-      </div>
+        {/* --- Main Content Area --- */}
+        <main className="p-4 md:p-6">
 
-      {/* Related Images Section */}
-      <div className="grid grid-cols-2 gap-px bg-gray-200 pt-px">
-        <div className="bg-white overflow-hidden rounded-t-lg">
-           <img
-            src={relatedImage1Url}
-            alt="Related content 1"
-            className="w-full h-auto object-cover aspect-[3/2]"
-          />
-        </div>
-         <div className="bg-white overflow-hidden rounded-t-lg">
-           <img
-            src={relatedImage2Url}
-            alt="Related content 2"
-            className="w-full h-auto object-cover aspect-[3/2]"
-          />
-        </div>
-              </div>
-    </div>
+          {/* --- Featured Section --- */}
+          <section className="mb-8 md:mb-12">
+            <div
+              className="relative overflow-hidden rounded-lg mb-4 cursor-pointer group bg-gray-200" // Added background color for placeholder
+              onClick={() => handleImageClick()} // Pass no specific URL/ID if src is empty
+            >
+              <img
+                src="" // Removed placeholder URL
+                alt={featuredImage.title}
+                className="w-full h-auto object-cover aspect-[3/4] md:aspect-video lg:aspect-[16/9] group-hover:opacity-90 transition-opacity" // Adjust aspect ratio for responsiveness
+              />
+              {/* Optional: Add overlay or icon on hover */}
+            </div>
+            <h2 className="uppercase font-bold text-lg md:text-xl lg:text-2xl text-center tracking-wide leading-tight">
+              {featuredImage.title}
+            </h2>
+          </section>
+
+          {/* --- Image Gallery Grid --- */}
+          <section>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-4">
+              {galleryImages.map((image) => (
+                <div
+                  key={image.id}
+                  className="relative overflow-hidden rounded-lg cursor-pointer group bg-gray-200" // Added background color for placeholder
+                  onClick={() => handleImageClick(image.id)}
+                >
+                  <img
+                    src="" // Removed placeholder URL
+                    alt={`Gallery image ${image.id}`}
+                    className="w-full h-full object-cover aspect-square group-hover:opacity-90 transition-opacity" // Square aspect ratio for grid items
+                  />
+                   {/* Optional: Add overlay or icon on hover */}
+                </div>
+              ))}
+            </div>
+          </section>
+
+        </main>
+
+      </div> {/* End max-width container */}
+    </div> // End main container
   );
-}
+};
 
 export default PhotoPage;
