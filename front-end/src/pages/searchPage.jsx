@@ -1,6 +1,7 @@
 import React from 'react';
-import TextHeader from '../text-header.jsx';
-import SearchBar from '../searchbar.jsx';
+
+import SearchBar from '../components/searchbar.jsx';
+
 
 function SearchPage() {
   return (
@@ -10,4 +11,4 @@ function SearchPage() {
   );
 }
 
-export default SearchPage; 
+export default SearchPage;
