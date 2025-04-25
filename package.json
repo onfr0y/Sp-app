@@ -1,0 +1,30 @@
+{
+  "name": "sp-app",
+  "version": "1.0.0",
+  "description": "This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node back-end/index.js",
+    "dev": "nodemon back-end/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/onfr0y/Sp-app.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/onfr0y/Sp-app/issues"
+  },
+  "homepage": "https://github.com/onfr0y/Sp-app#readme",
+  "dependencies": {
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "mongoose": "^8.13.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
