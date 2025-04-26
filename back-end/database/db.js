@@ -4,7 +4,6 @@ export const connectDB = async () => {
     try{
         await mongoose.connect(process.env.MONGODB_URL, {
             dbName: 'notonfr0y',
-
         });
         console.log('MongoDB connected');
     }catch (error) {

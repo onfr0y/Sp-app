@@ -37,7 +37,7 @@ const PostPage = () => {
 
   return (
     // Responsive container
-    <div className="min-h-screen bg-gray-100 p-4 flex justify-center items-center">
+    <div className=" backdrop-blur-lm min-h-screen bg-gray-100 p-4 flex justify-center items-center">
       {/* Main content card */}
       <div className="w-full max-w-lg bg-white/40 backdrop-blur-xl rounded-2xl shadow-lg overflow-hidden font-sans flex flex-col border border-white/30">
 
