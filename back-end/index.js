@@ -1,10 +1,24 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import { connectDB } from './database/db.js';
+import cloudinary from "cloudinary"
 
 dotenv.config();
 
+cloudinary.v2.config({
+  cloud_name: process.env.Cloudinary_Cloud_name,
+  api_key: process.env.Cloudinary_Api,
+  api_secret: process.env.Cloudinary_Secret
+})
+
+
+
 const app = express();
+
+
+
+// using middleware
+app.use(express.json());
 
 const PORT = process.env.PORT || 6000;
 
