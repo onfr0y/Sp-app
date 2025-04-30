@@ -145,6 +145,15 @@ export default function DynamicActionBar() {
     navigate('/post');
   };
 
+  const handleLoginRegClick = () => {
+    if (expandedIndex !== -1) {
+      collapseDetails();
+    }
+    navigate('/login');
+  };
+
+
+
   // --- Parent Padding Reminder ---
   // <main className="pb-28"> ... page content ... </main>
 
@@ -180,16 +189,15 @@ export default function DynamicActionBar() {
             {/* --- Details Content --- */}
              {index === 0 && (
                  <>
-                   <div className="w-[95%] flex items-center gap-3 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 rounded-2xl py-3 px-3 duration-300">
-                     <img src="/gather.svg" alt="gather" className="w-16 rounded-xl object-cover h-16 shrink-0"/>
-                     <div className="w-full flex flex-col items-start"><p className="font-bold">Gather</p><p className="opacity-80">Virtual Office</p></div>
-                     <span className="block shrink-0 py-1 px-2 text-sm rounded-lg opacity-80 border border-black/50 dark:border-white/30">Mac</span>
+                   <div onClick={handleLoginRegClick} className="w-[95%] flex items-center gap-3 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 rounded-2xl py-3 px-3 duration-300">
+              
+                     <div className="w-full flex flex-col items-start"><p className="font-bold">Login</p><p className="opacity-80">Make your dream reach</p></div>
+
                    </div>
-                   <div className="w-[95%] flex items-center gap-3 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 rounded-2xl py-3 px-3 duration-300">
-                     <img src="/slack.svg" alt="slack" className="w-16 rounded-xl object-cover h-16 shrink-0"/>
-                     <div className="w-full flex flex-col items-start"><p className="font-bold">Slack</p><p className="opacity-80">Communication App</p></div>
-                     <span className="block shrink-0 py-1 px-2 text-sm rounded-lg opacity-80 border border-black/50 dark:border-white/30">Windows</span>
-                   </div>
+                   <div onClick={handleLoginRegClick} className="w-[95%] flex items-center gap-3 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 rounded-2xl py-3 px-3 duration-300">
+             
+                     <div className="w-full flex flex-col items-start"><p className="font-bold">Register</p><p className="opacity-80">Communication App</p></div>
+                    </div>
                    <div className="h-[1px] w-[95%] bg-black/10 dark:bg-white/10 mt-4 mx-auto"></div>
                  </>
              )}
