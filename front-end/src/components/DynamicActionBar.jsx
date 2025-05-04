@@ -1,5 +1,4 @@
 import React, { useRef, useEffect, useState } from 'react';
-import gsap from 'gsap';
 import { useNavigate } from 'react-router-dom';
 
 // Define the breakpoint (Tailwind's md breakpoint)
@@ -23,7 +22,6 @@ export default function DynamicActionBar() {
 
   const duration = 0.75;
   const duration2 = 0.3;
-  const ease = 'elastic.out(1, 0.5)';
 
   // --- Screen Resize Detection ---
   useEffect(() => {
@@ -86,26 +84,16 @@ export default function DynamicActionBar() {
       }
     };
 
-    // Animate the container: Height grows, lifts slightly on desktop
-    gsap.to(containerRef.current, {
-      height: targetHeight(),
-      y: getResponsiveValue(0, -17), // Lift up only on desktop (negative y)
-      borderRadius: 24,
-      duration,
-      ease,
-      overwrite: true,
-    });
+    // Update the container: Height grows, lifts slightly on desktop
+    containerRef.current.style.height = `${targetHeight()}px`;
+    containerRef.current.style.transform = `translateY(${getResponsiveValue(0, -17)}px)`;
+    containerRef.current.style.borderRadius = '24px';
 
-    // Fade in the correct details
+    // Show the correct details
     detailsRef.current.forEach((detail, idx) => {
       if (!detail) return;
-      gsap.to(detail, {
-        opacity: index === idx ? 1 : 0,
-        duration: duration2,
-        delay: index === idx ? duration * 0.2 : 0,
-        zIndex: index === idx ? 2 : 1, // Ensure active details are on top
-        overwrite: true,
-      });
+      detail.style.opacity = index === idx ? '1' : '0';
+      detail.style.zIndex = index === idx ? '2' : '1';
     });
   };
 
@@ -116,25 +104,16 @@ export default function DynamicActionBar() {
       setExpandedIndex(-1);
     }
 
-    gsap.to(containerRef.current, {
-      // Return to base height for the current screen size
-      height: getResponsiveValue(ACTION_BAR_MOBILE_HEIGHT, ACTION_BAR_DESKTOP_HEIGHT),
-      y: 0, // Return to base y position
-      borderRadius: getResponsiveValue(16, 16), // Adjust if needed
-      duration: duration * 0.8,
-      ease: 'power2.inOut', // Smoother collapse ease
-      overwrite: true,
-    });
+    // Return to base height for the current screen size
+    containerRef.current.style.height = getResponsiveValue(ACTION_BAR_MOBILE_HEIGHT, ACTION_BAR_DESKTOP_HEIGHT);
+    containerRef.current.style.transform = 'translateY(0)';
+    containerRef.current.style.borderRadius = `${getResponsiveValue(16, 16)}px`;
 
     // Hide all details
     detailsRef.current.forEach((detail) => {
       if (!detail) return;
-      gsap.to(detail, {
-        opacity: 0,
-        duration: 0.1, // Faster fade out
-        zIndex: 1,
-        overwrite: true,
-      });
+      detail.style.opacity = '0';
+      detail.style.zIndex = '1';
     });
   };
 
@@ -151,8 +130,6 @@ export default function DynamicActionBar() {
     }
     navigate('/login');
   };
-
-
 
   // --- Parent Padding Reminder ---
   // <main className="pb-28"> ... page content ... </main>

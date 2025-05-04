@@ -1,55 +1,73 @@
-
+// index.js
 import express from 'express';
 import dotenv from 'dotenv';
-import { connectDB } from './database/db.js';
-import cloudinary from "cloudinary"
 import morgan from 'morgan';
-import helmet from 'helmet'; // Moved import higher up for consistency
-import cors from 'cors'; // Moved import higher up for consistency
+import helmet from 'helmet';
+import cors from 'cors';
+import mongoose from 'mongoose';
 
+// --- Load Environment Variables FIRST ---
+dotenv.config(); // Make sure .env variables are loaded
 
-dotenv.config();
+// --- Import Routes ---
+// Make sure to add .js extension for local file imports in ES Modules
+import authRoute from './routes/auth.js';
+import userRoute from './routes/users.js';
+import postRoute from './routes/post.js';
 
-cloudinary.v2.config({
-  cloud_name: process.env.Cloudinary_Cloud_name,
-  api_key: process.env.Cloudinary_Api,
-  api_secret: process.env.Cloudinary_Secret
-})
-
+// --- Create Express App ---
 const app = express();
 
-// using middleware
-app.use(express.json());
-app.use(helmet());
-app.use(morgan('common'));
+// --- Middleware --- (Should come before routes)
 app.use(cors({
-  origin: 'http://localhost:5173', // <--- Replace with your frontend's actual origin
-  credentials: true, // Allow cookies if needed
+  origin: 'http://localhost:5173', // Or your specific frontend URL
+  credentials: true,
 }));
+app.use(helmet()); // Apply security headers
+app.use(express.json()); // Parse JSON request bodies
+app.use(morgan('common')); // HTTP request logging
+// --- End Middleware ---
 
+// --- Environment Variables and Constants ---
+const PORT = process.env.PORT || 9000; // Default to 9000 if not set in .env
+const MONGO_URI = process.env.MONGODB_URI; // Read the URI from .env
 
-// --- CORRECT IMPORT SECTION ---
-// Import the routers you created
-import authRoutes from './routes/authRoutes.js';
-import userRoutes from './routes/userRoutes.js';
-import postRoutes from './routes/postRoutes.js';
-// -----------------------------
+// --- API Routes --- (Define routes after middleware)
+app.use("/api/auth", authRoute);
+app.use("/api/users", userRoute);
+app.use("/api/posts", postRoute);
+// --- End API Routes ---
 
-const PORT = process.env.PORT || 6000;
-
-app.get('/', (req, res) => {
-    res.send('home_page');
+// --- Basic Root Route (Optional) ---
+app.get("/", (req, res) => {
+    res.send("Backend API is running! grade 4 kub pls"); // Updated message
 });
+// --- End Basic Route ---
 
-// --- CORRECT ROUTE USAGE SECTION ---
-// Tell the Express app to use the imported routers with specific base paths
-app.use('/api/auth', authRoutes); // Any request to /api/auth/... will be handled by authRoutes
-app.use('/api/user', userRoutes); // Any request to /api/user/... will be handled by userRoutes
-app.use('/api/post', postRoutes); // Any request to /api/post/... will be handled by postRoutes
-// ---------------------------------
+// --- Database Connection and Server Start ---
+// Check if the MongoDB URI is actually loaded
+if (!MONGO_URI) {
+  console.error("FATAL ERROR: MONGODB_URI environment variable is not set or loaded correctly.");
+  console.error("Please ensure you have a .env file with MONGODB_URI=your_connection_string");
+  process.exit(1); // Exit the application if the DB connection string is missing
+}
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-  connectDB();
-});
+// Connect to MongoDB and Start Server
+mongoose.connect(MONGO_URI)
+  .then(() => {
+    console.log("MongoDB connected successfully!");
+    // Start listening for requests only AFTER the database is connected
+    app.listen(PORT, () => {
+      console.log(`Server is running on http://localhost:${PORT}`);
+    });
+  })
+  .catch((err) => {
+    // Catch errors during the initial connection
+    console.error("MongoDB initial connection error:", err);
+    process.exit(1); // Exit the application if it can't connect to the DB on startup
+  });
+// --- End Database Connection and Server Start ---
+
+// NOTE: The redundant app.listen at the very end has been removed
+// as it's now correctly placed inside the mongoose.connect().then() callback.
 
