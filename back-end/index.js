@@ -13,7 +13,7 @@ dotenv.config(); // Make sure .env variables are loaded
 // Make sure to add .js extension for local file imports in ES Modules
 import authRoute from './routes/auth.js';
 import userRoute from './routes/users.js';
-import postRoute from './routes/post.js';
+import postRoute from './routes/posts.js';
 
 // --- Create Express App ---
 const app = express();
@@ -70,4 +70,3 @@ mongoose.connect(MONGO_URI)
 
 // NOTE: The redundant app.listen at the very end has been removed
 // as it's now correctly placed inside the mongoose.connect().then() callback.
-

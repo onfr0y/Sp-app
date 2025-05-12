@@ -64,9 +64,48 @@ router.post("/register", async (req, res) => {
 
 
 // --- MINIMAL LOGIN ENDPOINT (You'll need to implement this fully later) ---
+// --- LOGIN Endpoint (Refactored) ---
 router.post("/login", async (req, res) => {
-   // Add login logic here (find user, compare password with bcrypt.compare)
-   res.status(501).json({ message: "Login not implemented yet."}); // 501 Not Implemented
+  try {
+   // 1. Get data from request body
+   const { email, password } = req.body;
+
+   // 2. Basic input validation
+   if (!email || !password) {
+     // Send 400 Bad Request if data is missing
+     return res.status(400).json({ message: "Email and password are required." });
+   }
+
+   // 3. Find user by email
+   const user = await User.findOne({ email: email });
+
+   // 4. Check if user exists AND if password is valid (using same error message for security)
+   //    We check user first to avoid error if user is null, then check password.
+   if (!user) {
+       // User not found - Send 401 Unauthorized
+       // Log potentially useful info server-side if needed for debugging failed attempts
+       // console.log(`Login attempt failed: User not found for email ${email}`);
+       return res.status(401).json({ message: "Invalid email or password." });
+   }
+
+   // 5. Compare submitted password with the hashed password in the database
+   const validPassword = await bcrypt.compare(password, user.password);
+   if (!validPassword) {
+       // Password doesn't match - Send 401 Unauthorized (same message as user not found)
+       // console.log(`Login attempt failed: Invalid password for email ${email}`);
+       return res.status(401).json({ message: "Invalid email or password." });
+   }
+
+   // 6. Login successful - Respond with 200 OK (excluding password)
+   //    In a real app, you'd typically generate and return a JWT (JSON Web Token) here
+   const { password: userPassword, ...otherDetails } = user._doc;
+   res.status(200).json(otherDetails); // Send back user details (without password)
+
+  } catch (err) {
+    // 7. Handle unexpected errors during the process
+    console.error("Login Error:", err); // Log the detailed error on the server
+    res.status(500).json({ message: "Internal server error during login." });
+  }
 });
 
 

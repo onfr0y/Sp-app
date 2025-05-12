@@ -37,6 +37,7 @@
     "path": "^0.12.7"
   },
   "devDependencies": {
+    "jshint": "^2.13.6",
     "nodemon": "^3.1.10"
   }
 }
