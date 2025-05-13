@@ -21,10 +21,7 @@ const postSchema = new mongoose.Schema(
     likes:{
         type:Array,
         default:[]
-    },
-    
-    
-    
+    }
   },
   { timestamps: true } // Automatically add createdAt and updatedAt fields
 );
