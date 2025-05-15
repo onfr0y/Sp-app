@@ -1,125 +1,146 @@
+// src/components/photobuble.jsx
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useTransition, a } from '@react-spring/web';
 
-// --- Photobuble Component ---
-function Photobuble({ data = [] }) {
-  // --- State and Effects for Responsive Columns ---
-  const [columns, setColumns] = useState(2); // Start with 2 columns for mobile
+// Simple debounce function helper (keep this as is)
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => { clearTimeout(timeout); func(...args); };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
 
+function Photobuble({ data = [] }) { // data will be fetched by parent and passed here
+  console.log("Photobuble received data:", data); // Log received data
+
+  const [columns, setColumns] = useState(2);
   useEffect(() => {
     const updateColumns = () => {
-      // Using common Tailwind-like breakpoints
-      if (window.matchMedia('(min-width: 1280px)').matches) { // xl and up
-        setColumns(5);
-      } else if (window.matchMedia('(min-width: 1024px)').matches) { // lg
-        setColumns(4);
-      } else if (window.matchMedia('(min-width: 768px)').matches) { // md
-        setColumns(3);
-      } else { // sm and mobile
-        setColumns(2); // Default to 2 columns on smaller screens
-      }
+      if (window.matchMedia('(min-width: 1280px)').matches) setColumns(5);
+      else if (window.matchMedia('(min-width: 1024px)').matches) setColumns(4);
+      else if (window.matchMedia('(min-width: 768px)').matches) setColumns(3);
+      else setColumns(2);
     };
     updateColumns();
     window.addEventListener('resize', updateColumns);
     return () => window.removeEventListener('resize', updateColumns);
   }, []);
 
-  // --- State and Effects for Container Width ---
   const ref = useRef(null);
-  const [width, setWidth] = useState(0);
-
+  const [containerWidth, setContainerWidth] = useState(0);
   useEffect(() => {
     const debouncedHandleResize = debounce(() => {
-        if (ref.current) {
-            setWidth(ref.current.offsetWidth);
-        }
-    }, 100); // Debounce resize handling slightly
+      if (ref.current) {
+        console.log("Photobuble: Resizing, new containerWidth:", ref.current.offsetWidth);
+        setContainerWidth(ref.current.offsetWidth);
+      }
+    }, 100);
 
     if (ref.current) {
-        setWidth(ref.current.offsetWidth); // Initial width
+      console.log("Photobuble: Initial containerWidth:", ref.current.offsetWidth);
+      setContainerWidth(ref.current.offsetWidth);
+    } else {
+        const initialMeasurementTimeout = setTimeout(() => {
+            if (ref.current) {
+                console.log("Photobuble: Delayed initial containerWidth:", ref.current.offsetWidth);
+                setContainerWidth(ref.current.offsetWidth);
+            } else {
+                console.warn("Photobuble: ref.current is still null after delay for width measurement.");
+            }
+        }, 50); // Increased delay slightly for safety
+        return () => clearTimeout(initialMeasurementTimeout);
     }
     window.addEventListener('resize', debouncedHandleResize);
     return () => window.removeEventListener('resize', debouncedHandleResize);
   }, []);
 
-  // --- Masonry Calculation Logic ---
-  // This part calculates positions based on container width, columns, and item heights
   const [heights, gridItems] = useMemo(() => {
-    let columnHeights = new Array(columns).fill(0); // Tracks the height of each column
-    let items = data.map((child) => {
-      const column = columnHeights.indexOf(Math.min(...columnHeights)); // Find the shortest column
-      const itemWidth = width / columns; // Calculate width based on container and columns
-      // --- Use the height directly from data ---
-      // ASSUMPTION: child.height is the intended display height for the masonry layout.
-      const itemHeight = child.height;
-      // --- Calculate positions ---
-      const x = itemWidth * column; // Horizontal position based on column index
-      // Vertical position is the current height of the shortest column
+    console.log("Photobuble useMemo: Calculating gridItems. Data length:", data.length, "containerWidth:", containerWidth, "columns:", columns);
+    if (containerWidth === 0 || data.length === 0 || columns === 0) {
+      console.log("Photobuble useMemo: Bailing early due to zero width, no data, or zero columns.");
+      return [[], []];
+    }
+
+    let columnHeights = new Array(columns).fill(0);
+    let items = data.map((child, index) => {
+      if (!child || typeof child.id === 'undefined' || typeof child.image === 'undefined') {
+        console.warn(`Photobuble useMemo: Item at index ${index} is invalid (missing id or image):`, child);
+        return null; // Skip invalid items
+      }
+
+      const column = columnHeights.indexOf(Math.min(...columnHeights));
+      const itemWidth = containerWidth / columns;
+
+      // --- SIMPLIFIED: Use child.height directly as provided by backend ---
+      const itemHeight = child.height || 200; // Use child.height or a fallback if it's missing/zero
+      // console.log(`Photobuble useMemo - item ${index} ('${child.id}'): itemWidth=${itemWidth}, itemHeight=${itemHeight}`);
+
+
+      const x = itemWidth * column;
       const y = columnHeights[column];
-      // --- Update the height of the column this item was added to ---
-      columnHeights[column] += itemHeight; // Add item's height to the column height tracker
+      columnHeights[column] += itemHeight;
+      return {
+        ...child,
+        x,
+        y,
+        width: itemWidth,
+        height: itemHeight,
+        displayUrl: child.image
+      };
+    }).filter(item => item !== null); // Filter out any null items from invalid data
 
-      return { ...child, x, y, width: itemWidth, height: itemHeight };
-    });
-    return [columnHeights, items]; // Return updated column heights and positioned items
-  }, [columns, data, width]); // Recalculate when these change
+    console.log("Photobuble useMemo: Calculated gridItems count:", items.length, "Column heights:", columnHeights);
+    return [columnHeights, items];
+  }, [columns, data, containerWidth]);
 
-  // --- Animation Logic ---
   const transitions = useTransition(gridItems, {
-    keys: (item) => item.id, // Unique key for animation tracking
+    keys: (item) => item.id,
     from: ({ x, y, width, height }) => ({ x, y, width, height, opacity: 0 }),
     enter: ({ x, y, width, height }) => ({ x, y, width, height, opacity: 1 }),
-    update: ({ x, y, width, height }) => ({ x, y, width, height }), // Handles resize/column changes
+    update: ({ x, y, width, height }) => ({ x, y, width, height }),
     leave: { height: 0, opacity: 0 },
     config: { mass: 5, tension: 500, friction: 100 },
-    trail: 25, // Stagger the animation slightly
+    trail: 25,
   });
 
-  // --- Render ---
+  // Enhanced check for rendering
+  if (containerWidth === 0 && data.length > 0) {
+    console.log("Photobuble: Container width is 0, likely waiting for measurement. Data is present.");
+    // You might want to render a minimal placeholder or nothing until width is measured
+    // to avoid a flash of unstyled content or errors if gridItems calculation depends heavily on width.
+  }
+
+
   return (
-    // Section container: Takes full width available from parent.
-    // Padding 'p-5' removed from here; let parent control outer spacing.
-    // Added min-height for initial rendering or empty data.
     <section
-      ref={ref} // Attach ref to measure width
-      className="relative w-full h-full min-h-[200px]" // Ensure it takes space
-      // Set height dynamically based on the tallest calculated column
-      style={{ height: heights.length > 0 ? Math.max(...heights) : 'auto' }}
+      ref={ref}
+      className="relative w-full h-full min-h-[200px]" // Ensure min-height
+      style={{ height: heights && heights.length > 0 ? Math.max(0, ...heights) : 'auto' }}
     >
-      {transitions((style, item) => (
-        <a.div
-          key={item.id}
-          style={style} // Apply animated styles (position, size, opacity)
-          // Reduced padding for tighter item spacing: p-1 (4px) or p-1.5 (6px)
-          className="absolute p-1.5 [will-change:transform,width,height,opacity]"
-          // onClick={() => handleItemClick(item.id)} // Add click handler if needed
-        >
-          {/* Inner div for styling and background image */}
-          <div
-            className="relative w-full h-full overflow-hidden rounded-lg shadow-md cursor-pointer bg-gray-200" // Adjusted rounding, kept shadow/cursor
-            style={{
-              backgroundImage: `url(${item.image})`,
-              backgroundSize: 'cover', // Cover the area without distortion
-              backgroundPosition: 'center',
-            }}
-          />
-        </a.div>
-      ))}
+      {transitions((style, item) => {
+        // Defensive check for item, though useTransition should handle empty gridItems
+        if (!item) return null;
+        return (
+            <a.div
+              key={item.id}
+              style={style}
+              className="absolute p-1 sm:p-1.5 [will-change:transform,width,height,opacity]"
+            >
+              <div
+                className="relative w-full h-full overflow-hidden rounded-lg shadow-md cursor-pointer bg-gray-200"
+                style={{
+                  backgroundImage: `url(${item.displayUrl})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                }}
+              />
+            </a.div>
+        );
+    })}
     </section>
   );
 }
 
 export default Photobuble;
-
-// Simple debounce function helper
-function debounce(func, wait) {
-  let timeout;
-  return function executedFunction(...args) {
-    const later = () => {
-      clearTimeout(timeout);
-      func(...args);
-    };
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-  };
-}
