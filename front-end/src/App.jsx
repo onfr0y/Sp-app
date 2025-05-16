@@ -8,7 +8,6 @@ import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 
 // --- Import pages ---
 import HomePage from './pages/HomePage.jsx';
-
 import PostPage from './pages/PostPage.jsx';
 import PhotoPage from './pages/PhotoPage.jsx';
 import AuthPage from './pages/AuthPage.jsx';
@@ -16,7 +15,7 @@ import RegisterPage from './pages/RegisterPage.jsx'; // <-- IMPORT THE NEW REGIS
 import UserProfilePage from './pages/UserProfilePage.jsx';
 import NotFoundPage from './pages/NotFoundPage.jsx';
 import SignOutPage from './pages/SignOutPage.jsx';
-import SearchPage from './pages/SearchPage.jsx';
+import SearchPage from './pages/searchPage.jsx';
 
 // --- Protected Route Component ---
 // ... (Keep existing ProtectedRoute component)
