@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node back-end/index.js",
     "dev": "nodemon back-end/index.js",
-    "build": "npm install && cd front-end && npm install && npm run build"
+    "build" : "npm install && cd front-end && npm install && npm run build"
   },
   "repository": {
     "type": "git",
