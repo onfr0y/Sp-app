@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "start": "node back-end/index.js",
-    "dev": "nodemon back-end/index.js"
+    "dev": "nodemon back-end/index.js",
+    "build" : "npm install && cd front-end && npm install && npm run build"
   },
   "repository": {
     "type": "git",
@@ -23,7 +24,6 @@
     "axios": "^1.9.0",
     "bcrypt": "^5.1.1",
     "cloudinary": "^1.41.3",
-    "cores": "^0.8.5",
     "cors": "^2.8.5",
     "datauri": "^4.1.0",
     "dotenv": "^16.5.0",
