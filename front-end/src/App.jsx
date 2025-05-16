@@ -12,11 +12,13 @@ import SearchPage from './pages/SearchPage.jsx';
 import PostPage from './pages/PostPage.jsx';
 import PhotoPage from './pages/PhotoPage.jsx';
 import AuthPage from './pages/AuthPage.jsx';
+import RegisterPage from './pages/RegisterPage.jsx'; // <-- IMPORT THE NEW REGISTER PAGE
 import UserProfilePage from './pages/UserProfilePage.jsx';
 import NotFoundPage from './pages/NotFoundPage.jsx';
-import SignOutPage from './pages/SignOutPage.jsx'; // <-- IMPORT THE NEW SIGN OUT PAGE
+import SignOutPage from './pages/SignOutPage.jsx';
 
 // --- Protected Route Component ---
+// ... (Keep existing ProtectedRoute component)
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
 
@@ -36,12 +38,15 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
+
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<AuthPage />} />
+          <Route path="/signup" element={<RegisterPage />} /> {/* <-- ADDED REGISTER ROUTE */}
+          {/* ... (keep other routes) ... */}
           <Route
             path="/"
             element={
