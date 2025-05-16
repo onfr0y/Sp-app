@@ -18,7 +18,7 @@ export default function DynamicActionBar() {
   const actionBarRef = useRef(null);
   const navigate = useNavigate();
 
-  // Destructure currentUser and isAuthenticated from useAuth
+  // Destructure currentUser and isAuthenticated from useAuth  git add .
   const { currentUser, isAuthenticated } = useAuth(); // Added this line
 
   const [expandedIndex, setExpandedIndex] = useState(-1);
