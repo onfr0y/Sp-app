@@ -10,10 +10,11 @@ import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import HomePage from './pages/HomePage.jsx';
 import SearchPage from './pages/SearchPage.jsx';
 import PostPage from './pages/PostPage.jsx';
-import PhotoPage from './pages/PhotoPage.jsx'; // Assuming this is still used or a placeholder
+import PhotoPage from './pages/PhotoPage.jsx';
 import AuthPage from './pages/AuthPage.jsx';
-import UserProfilePage from './pages/UserProfilePage.jsx'; // <-- Import UserProfilePage
-import NotFoundPage from './pages/NotFoundPage.jsx'; // <-- Create this simple page
+import UserProfilePage from './pages/UserProfilePage.jsx';
+import NotFoundPage from './pages/NotFoundPage.jsx';
+import SignOutPage from './pages/SignOutPage.jsx'; // <-- IMPORT THE NEW SIGN OUT PAGE
 
 // --- Protected Route Component ---
 const ProtectedRoute = ({ children }) => {
@@ -89,6 +90,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <UserProfilePage />
+              </ProtectedRoute>
+            }
+          />
+           <Route // <-- ADDED ROUTE FOR SIGN OUT PAGE
+            path="/signout"
+            element={
+              <ProtectedRoute>
+                <SignOutPage />
               </ProtectedRoute>
             }
           />
