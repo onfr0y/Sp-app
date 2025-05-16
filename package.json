@@ -8,8 +8,8 @@
     "start": "node back-end/index.js",
     "dev": "nodemon back-end/index.js",
     "heroku-postbuild": "npm run build",
-    "build": "npm install && cd front-end && npm install && npm run build && npm run copy-frontend",
-    "copy-frontend": "rm -rf back-end/public && mkdir -p back-end/public && cp -R front-end/dist/* back-end/public/"
+    "build": "npm install && cd front-end && npm install && npm run build "
+
   },
   "repository": {
     "type": "git",
