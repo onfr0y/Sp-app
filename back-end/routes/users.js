@@ -3,8 +3,43 @@ import express from 'express';
 import User from '../models/User.js';
 import bcrypt from 'bcrypt';
 import mongoose from 'mongoose'; // Import mongoose to check ObjectId validity
+import protect from '../middleware/authMiddleware.js'; // Assuming you might want to protect search or use req.user
 
 const router = express.Router();
+
+// --- SEARCH USERS ---
+// GET /api/users/search?q=searchText
+router.get("/search", protect, async (req, res) => {
+  const searchQuery = req.query.q;
+
+  if (!searchQuery || typeof searchQuery !== 'string' || searchQuery.trim() === "") {
+    return res.status(400).json({ message: "Search query (q) is required and must be a non-empty string." });
+  }
+
+  try {
+    // Case-insensitive search for username.
+    // Using a regular expression for partial matching.
+    // 'i' flag for case-insensitivity.
+    // We use '^' to match from the beginning of the string for better relevance,
+    // but you can remove it for broader partial matching anywhere in the username.
+    const users = await User.find({
+      username: { $regex: `^${searchQuery.trim()}`, $options: "i" }
+    })
+    .select('-password -updatedAt -email') // Exclude sensitive/unnecessary fields
+    .limit(15); // Limit the number of results
+
+    if (!users || users.length === 0) {
+      return res.status(404).json({ message: "No users found matching your search." });
+    }
+
+    res.status(200).json(users);
+
+  } catch (err) {
+    console.error("Search Users Error:", err);
+    res.status(500).json({ message: "Failed to search for users." });
+  }
+});
+
 
 // --- GET A USER ---
 router.get("/:id", async (req, res) => {
@@ -32,43 +67,32 @@ router.get("/:id", async (req, res) => {
 });
 
 // --- FOLLOW A USER ---
-// WARNING: Using req.body.userId is insecure. User ID should come from auth.
-router.put("/:id/follow", async (req, res) => {
+// Now uses req.user from 'protect' middleware
+router.put("/:id/follow", protect, async (req, res) => {
   const userIdToFollow = req.params.id;
-  const currentUserId = req.body.userId; // Using userId from request body (INSECURE)
+  const currentUserId = req.user._id; // User ID from authenticated token
 
-  // Check if currentUserId was provided in the body
-  if (!currentUserId) {
-      return res.status(400).json({ message: "Current user ID (userId) is missing in the request body." });
+  if (!mongoose.Types.ObjectId.isValid(userIdToFollow)) {
+     return res.status(400).json({ message: "Invalid user ID format for user to follow." });
   }
 
-  // Validate IDs format
-  if (!mongoose.Types.ObjectId.isValid(userIdToFollow) || !mongoose.Types.ObjectId.isValid(currentUserId)) {
-     return res.status(400).json({ message: "Invalid user ID format." });
-  }
-
-  // Prevent following oneself
-  if (currentUserId === userIdToFollow) {
+  if (currentUserId.toString() === userIdToFollow) {
     return res.status(403).json({ message: "You can't follow yourself." });
   }
 
   try {
-    // Find both users concurrently for efficiency
-    const [userToFollow, currentUser] = await Promise.all([
-        User.findById(userIdToFollow),
-        User.findById(currentUserId)
-    ]);
+    const userToFollow = await User.findById(userIdToFollow);
+    const currentUser = await User.findById(currentUserId); // req.user is already the currentUser document
 
-    // Check if both users exist
-    if (!userToFollow || !currentUser) {
-      // Be more specific if possible
-      const notFoundId = !userToFollow ? userIdToFollow : currentUserId;
-      return res.status(404).json({ message: `User with ID ${notFoundId} not found.` });
+    if (!userToFollow) {
+      return res.status(404).json({ message: `User with ID ${userIdToFollow} not found.` });
+    }
+     if (!currentUser) { // Should not happen if protect middleware works
+      return res.status(404).json({ message: "Current user not found." });
     }
 
-    // Check if already following
+
     if (!userToFollow.followers.includes(currentUserId)) {
-      // Use findByIdAndUpdate for atomicity if possible, or update separately
       await userToFollow.updateOne({ $push: { followers: currentUserId } });
       await currentUser.updateOne({ $push: { followings: userIdToFollow } });
       res.status(200).json({ message: "User has been followed." });
@@ -82,42 +106,31 @@ router.put("/:id/follow", async (req, res) => {
 });
 
 // --- UNFOLLOW A USER ---
-// WARNING: Using req.body.userId is insecure. User ID should come from auth.
-router.put("/:id/unfollow", async (req, res) => {
+// Now uses req.user from 'protect' middleware
+router.put("/:id/unfollow", protect, async (req, res) => {
     const userIdToUnfollow = req.params.id;
-    const currentUserId = req.body.userId; // Using userId from request body (INSECURE)
+    const currentUserId = req.user._id; // User ID from authenticated token
 
-    // Check if currentUserId was provided
-    if (!currentUserId) {
-        return res.status(400).json({ message: "Current user ID (userId) is missing in the request body." });
+    if (!mongoose.Types.ObjectId.isValid(userIdToUnfollow)) {
+        return res.status(400).json({ message: "Invalid user ID format for user to unfollow." });
     }
 
-     // Validate IDs format
-    if (!mongoose.Types.ObjectId.isValid(userIdToUnfollow) || !mongoose.Types.ObjectId.isValid(currentUserId)) {
-        return res.status(400).json({ message: "Invalid user ID format." });
-    }
-
-    // Prevent unfollowing oneself
-    if (currentUserId === userIdToUnfollow) {
+    if (currentUserId.toString() === userIdToUnfollow) {
       return res.status(403).json({ message: "You can't unfollow yourself." });
     }
 
     try {
-       // Find both users concurrently
-       const [userToUnfollow, currentUser] = await Promise.all([
-            User.findById(userIdToUnfollow),
-            User.findById(currentUserId)
-       ]);
+       const userToUnfollow = await User.findById(userIdToUnfollow);
+       const currentUser = await User.findById(currentUserId); // req.user
 
-       // Check if both users exist
-       if (!userToUnfollow || !currentUser) {
-           const notFoundId = !userToUnfollow ? userIdToUnfollow : currentUserId;
-           return res.status(404).json({ message: `User with ID ${notFoundId} not found.` });
+       if (!userToUnfollow) {
+           return res.status(404).json({ message: `User with ID ${userIdToUnfollow} not found.` });
+       }
+       if (!currentUser) {
+           return res.status(404).json({ message: "Current user not found." });
        }
 
-       // Check if currently following
        if (userToUnfollow.followers.includes(currentUserId)) {
-           // Use findByIdAndUpdate or update separately
            await userToUnfollow.updateOne({ $pull: { followers: currentUserId } });
            await currentUser.updateOne({ $pull: { followings: userIdToUnfollow } });
            res.status(200).json({ message: "User has been unfollowed." });
@@ -130,29 +143,21 @@ router.put("/:id/unfollow", async (req, res) => {
     }
 });
 
-
-router.put("/:id", async (req, res) => {
+// --- UPDATE A USER ---
+// Now uses req.user from 'protect' middleware for authorization
+router.put("/:id", protect, async (req, res) => {
   const userIdToUpdate = req.params.id;
-  const currentUserId = req.body.userId; // Using userId from request body (INSECURE)
-  const isAdmin = req.body.isAdmin;     // Using isAdmin from request body (INSECURE)
+  const currentUserId = req.user._id; // User ID from authenticated token
+  const isAdmin = req.user.isAdmin;   // isAdmin from authenticated token
 
-   // Check if currentUserId was provided for the authorization check
-   if (!currentUserId) {
-       return res.status(400).json({ message: "Current user ID (userId) is missing in the request body for authorization." });
-   }
-
-   // Validate ID format
   if (!mongoose.Types.ObjectId.isValid(userIdToUpdate)) {
     return res.status(400).json({ message: "Invalid user ID format." });
   }
 
-  // Authorization Check (INSECURE VERSION based on request body)
-  if (currentUserId === userIdToUpdate || isAdmin) {
-
-    // Hash password if it's being updated
+  // Authorization Check
+  if (currentUserId.toString() === userIdToUpdate || isAdmin) {
     if (req.body.password) {
-      // Add password validation (e.g., length check) if needed
-      if(req.body.password.length < 6) { // Assuming min length 6 from User model
+      if(req.body.password.length < 6) {
           return res.status(400).json({ message: "Password must be at least 6 characters long."});
       }
       try {
@@ -165,21 +170,24 @@ router.put("/:id", async (req, res) => {
     }
 
     try {
-      // Prevent updating certain fields directly if needed (more secure)
       const allowedUpdates = { ...req.body };
+      // Prevent users from directly updating these sensitive fields via this route
       delete allowedUpdates.followers;
       delete allowedUpdates.followings;
-      // delete allowedUpdates.isAdmin; // Be cautious allowing isAdmin update here
+      if (!isAdmin) { // Only admin can change isAdmin status
+        delete allowedUpdates.isAdmin;
+      }
+
 
       const user = await User.findByIdAndUpdate(userIdToUpdate, {
-        $set: allowedUpdates, // Update with (potentially filtered) fields from body
-      }, { new: true, runValidators: true }); // Return updated doc and run schema validators
+        $set: allowedUpdates,
+      }, { new: true, runValidators: true });
 
       if (!user) {
           return res.status(404).json({ message: "User not found." });
       }
 
-      const { password, updatedAt, ...other } = user._doc || {}; // Exclude password
+      const { password, updatedAt, ...other } = user._doc || {};
       res.status(200).json({ message: "Account has been updated", user: other });
 
     } catch (err) {
@@ -190,17 +198,14 @@ router.put("/:id", async (req, res) => {
       if (err.name === 'ValidationError') {
          return res.status(400).json({ message: "Update validation failed", errors: err.errors });
       }
-       if (err.code === 11000) { // Handle potential unique constraint errors (e.g., changing email to one that exists)
-        // Determine which field caused the error if possible (requires parsing err.keyPattern or err.keyValue)
+       if (err.code === 11000) {
         return res.status(409).json({ message: "Update failed. Username or email may already exist." });
       }
       return res.status(500).json({ message: "Failed to update account." });
     }
   } else {
-    // Authorization failed
     return res.status(403).json({ message: "You are not authorized to update this account." });
   }
 });
 
-// Export the router
 export default router;
