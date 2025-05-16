@@ -70,6 +70,35 @@ app.use("/api/users", userRoute);
 app.use("/api/posts", postRoute);
 console.log("SERVER_SETUP: API routes configured.");
 
+
+// cloudinary configuration
+try {
+  cloudinary.v2.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+    secure: true
+  });
+  console.log("SERVER_INIT: Cloudinary SDK configured successfully.");
+
+  // --- UNCOMMENT THIS SECTION ---
+  cloudinary.v2.api.ping((error, result) => {
+    if (error) {
+      console.warn("CLOUDINARY_WARN: Ping failed. Check credentials/network.", error.message);
+    } else {
+      console.log("CLOUDINARY_INFO: Ping successful.", result); // Should show { status: 'ok' }
+    }
+  });
+  // --- END UNCOMMENT ---
+
+} catch (e) {
+  console.error("SERVER_ERROR: Failed to configure Cloudinary SDK.", e);
+}
+// ...
+
+
+
+
 // --- Basic Root Route ---
 app.get("/", (req, res) => {
     res.status(200).send("Backend API is operational!");
@@ -119,11 +148,6 @@ if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && proce
       secure: true // Good practice to ensure HTTPS URLs
     });
     console.log("SERVER_INIT: Cloudinary SDK configured successfully.");
-    // Optional: Ping Cloudinary to verify connection
-    // cloudinary.v2.api.ping((error, result) => {
-    //   if (error) console.warn("CLOUDINARY_WARN: Ping failed. Check credentials/network.", error.message);
-    //   else console.log("CLOUDINARY_INFO: Ping successful.", result);
-    // });
   } catch (e) {
     console.error("SERVER_ERROR: Failed to configure Cloudinary SDK.", e);
   }
