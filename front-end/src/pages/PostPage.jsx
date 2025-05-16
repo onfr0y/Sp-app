@@ -135,7 +135,7 @@ const PostPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 to-sky-100 dark:from-slate-900 dark:to-sky-800 p-4 flex flex-col justify-center items-center font-sans">
+    <div className="min-h-screen bg-[url('https://i.pinimg.com/736x/de/d3/45/ded3457a372af8ee97e0c7ef0f2a8f1d.jpg')] dark:from-slate-900 dark:to-sky-800 p-4 flex flex-col justify-center items-center font-sans">
       <div className="w-full max-w-lg bg-white/75 dark:bg-zinc-800/75 backdrop-blur-2xl rounded-3xl shadow-2xl overflow-hidden border border-white/40 dark:border-zinc-700/60 flex flex-col">
         {/* Assuming PostPageHeader is styled for glassmorphism or is simple */}
         <PostPageHeader title="Create New Post" onGoBack={handleGoBack} />
