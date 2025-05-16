@@ -1,20 +1,28 @@
 {
   "name": "sp-app",
   "version": "1.0.0",
-  "description": "This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.",
-  "main": "index.js",
+  "description": "Full-stack social media application with React frontend and Node.js/Express backend.",
+  "main": "back-end/index.js",
   "type": "module",
   "scripts": {
     "start": "node back-end/index.js",
     "dev": "nodemon back-end/index.js",
-    "build" : "npm install && cd front-end && npm install && npm run build"
+    "heroku-postbuild": "npm run build",
+    "build": "npm install && cd front-end && npm install && npm run build && npm run copy-frontend",
+    "copy-frontend": "rm -rf back-end/public && mkdir -p back-end/public && cp -R front-end/dist/* back-end/public/"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/onfr0y/Sp-app.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "react",
+    "express",
+    "node",
+    "mongodb",
+    "social-media"
+  ],
+  "author": "onfr0y",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/onfr0y/Sp-app/issues"
@@ -41,6 +49,10 @@
   },
   "devDependencies": {
     "jshint": "^2.13.6",
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.10",
+    "rimraf": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
