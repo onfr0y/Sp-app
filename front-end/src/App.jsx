@@ -4,23 +4,26 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css'; // Tailwind CSS or global styles
 
 // --- Auth Context ---
-import { AuthProvider, useAuth } from './context/AuthContext.jsx'; // <<<--- CORRECTED PATH AND EXTENSION
+import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 
 // --- Import pages ---
 import HomePage from './pages/HomePage.jsx';
 import SearchPage from './pages/SearchPage.jsx';
 import PostPage from './pages/PostPage.jsx';
-import PhotoPage from './pages/PhotoPage.jsx';
+import PhotoPage from './pages/PhotoPage.jsx'; // Assuming this is still used or a placeholder
 import AuthPage from './pages/AuthPage.jsx';
+import UserProfilePage from './pages/UserProfilePage.jsx'; // <-- Import UserProfilePage
+import NotFoundPage from './pages/NotFoundPage.jsx'; // <-- Create this simple page
 
-// --- Protected Route Component (Example) ---
+// --- Protected Route Component ---
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p>Loading authentication...</p>
+      <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-zinc-900">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600"></div>
+        <p className="ml-3 text-gray-700 dark:text-gray-300">Loading session...</p>
       </div>
     );
   }
@@ -36,7 +39,6 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        {/* <Navbar /> */}
         <Routes>
           <Route path="/login" element={<AuthPage />} />
           <Route
@@ -56,24 +58,44 @@ function App() {
             }
           />
           <Route
-            path="/post"
+            path="/post" // For creating a new post
             element={
               <ProtectedRoute>
                 <PostPage />
               </ProtectedRoute>
             }
           />
+           {/* If you have a page to view a single post by its ID */}
+           <Route
+            path="/post/:postId" // Viewing a specific post
+            element={
+              <ProtectedRoute>
+                {/* Replace with your actual SinglePostViewPage component if you have one */}
+                {/* For now, could redirect or show a placeholder */}
+                <div>Single Post View (Not Implemented)</div>
+              </ProtectedRoute>
+            }
+          />
           <Route
-            path="/photopage"
+            path="/photopage" // This route might be legacy or for a different feature
             element={
               <ProtectedRoute>
                 <PhotoPage />
               </ProtectedRoute>
             }
           />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route // <-- New Route for User Profiles
+            path="/profile/:userId"
+            element={
+              <ProtectedRoute>
+                <UserProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/settings/edit-profile" element={ <ProtectedRoute><div>Edit Profile Page (Not Implemented)</div></ProtectedRoute>} />
+          <Route path="/not-found" element={<NotFoundPage />} />
+          <Route path="*" element={<Navigate to="/not-found" replace />} /> {/* Catch-all for 404 */}
         </Routes>
-        {/* <Footer /> */}
       </AuthProvider>
     </BrowserRouter>
   );

@@ -130,6 +130,12 @@ export default function DynamicActionBar() {
     }
     navigate('/login');
   };
+   const handleProfilePageCLick = () => {
+    if (expandedIndex !== -1) {
+      collapseDetails();
+    }
+    navigate('/profile/:userId');
+  };
 
   // --- Parent Padding Reminder ---
   // <main className="pb-28"> ... page content ... </main>
@@ -182,7 +188,7 @@ export default function DynamicActionBar() {
                  <>
                     <div className="w-full group">
                       <div className="flex items-center justify-between w-full gap-3 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 rounded-2xl py-2 px-3 duration-300 mx-auto">
-                        <div className="flex items-center gap-3">
+                        <div onClick={handleProfilePageCLick} className="flex items-center gap-3">
                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="h-6 w-6"><path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"/></svg>
                            <span className="font-bold">Your profile</span>
                         </div>

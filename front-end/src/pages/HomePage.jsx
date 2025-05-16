@@ -2,19 +2,24 @@
 import React, { useEffect, useState } from 'react';
 import TextHeader from '../components/text-header.jsx';
 import SearchBar from '../components/searchbar.jsx';
-import Photobuble from '../components/photobuble.jsx'; // Use the Photobuble version that you know works with static data
+import Photobuble from '../components/photobuble.jsx';
 import Catebub from '../components/cate-bub.jsx';
 import DynamicActionBar from '../components/DynamicActionBar.jsx';
 import axios from 'axios';
+import DetailedPostModal from '../components/DetailedPostModal.jsx'; // Import the modal
+import { useAuth } from '../context/AuthContext.jsx'; // To get current user for author info fallback
 
 function HomePage() {
-  // State for posts fetched from backend
-  const [feedPosts, setFeedPosts] = useState([]); // Initialize with empty array
+  const [feedPosts, setFeedPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Define the base URL for your API.
-  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'; // Fallback
+  // State for the modal
+  const [selectedPostForModal, setSelectedPostForModal] = useState(null);
+  const [authorDetails, setAuthorDetails] = useState(null);
+
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+  const { currentUser } = useAuth(); // Get current user details
 
   useEffect(() => {
     const fetchFeedPosts = async () => {
@@ -26,26 +31,33 @@ function HomePage() {
         console.log("HomePage useEffect: Fetching from URL:", endpoint);
         const response = await axios.get(endpoint);
 
-        console.log("HomePage useEffect: Raw response from backend:", response);
-
         if (response && response.data && Array.isArray(response.data)) {
           console.log("HomePage useEffect: Data is an array. Length:", response.data.length);
-          // Validate each item to ensure it has id, image, and height
-          const validatedPosts = response.data.map((post, index) => {
-            const isValid = post && typeof post.id !== 'undefined' &&
-                            typeof post.image === 'string' && post.image.trim() !== '' &&
-                            typeof post.height === 'number' && !isNaN(post.height);
+          const validatedPosts = response.data.map((post) => {
+            // Ensure all necessary fields for both Photobuble and DetailedPostModal are present
+            const isValid = post &&
+                            typeof post.id !== 'undefined' && // Photobuble key, Modal ID
+                            typeof post.image === 'string' && // Photobuble display image
+                            typeof post.height === 'number' && !isNaN(post.height) && // Photobuble layout
+                            typeof post.userId === 'string' && // For fetching author
+                            (typeof post.desc === 'string' || post.desc === null || typeof post.desc === 'undefined') && // Description
+                            Array.isArray(post.likes) && // Likes array
+                            typeof post.createdAt !== 'undefined'; // Post date
+                            // The 'img' array from the backend model is also good to have directly on the post object
+                            // if the DetailedPostModal needs to show multiple images or specific details from it.
+                            // The backend currently maps the first image from 'img' to 'post.image'.
+                            // If 'post.img' itself is needed, ensure it's passed through.
+
             if (!isValid) {
-              console.warn(`HomePage useEffect: Post at index ${index} is invalid or missing required fields (id, image, height):`, post);
+              console.warn(`HomePage useEffect: Post is invalid or missing required fields:`, post);
             }
             return isValid ? post : null;
-          }).filter(post => post !== null); // Remove invalid posts
+          }).filter(post => post !== null);
 
           if (validatedPosts.length !== response.data.length) {
             console.warn("HomePage useEffect: Some posts were filtered out due to validation issues.");
           }
           
-          console.log("HomePage useEffect: Validated posts to be set:", validatedPosts);
           setFeedPosts(validatedPosts);
 
         } else {
@@ -55,28 +67,60 @@ function HomePage() {
       } catch (err) {
         console.error("HomePage useEffect: Error during fetchPosts:", err);
         let errorMessage = "Failed to load feed.";
-        if (err.response) { // Axios error structure
-          console.error("HomePage useEffect: Axios error response data:", err.response.data);
-          console.error("HomePage useEffect: Axios error response status:", err.response.status);
-          errorMessage = err.response.data?.message || err.message || "Error from server (no specific message).";
-        } else if (err.request) { // Request was made but no response
-          console.error("HomePage useEffect: No response received for the request:", err.request);
+        if (err.response) {
+          errorMessage = err.response.data?.message || err.message || "Error from server.";
+        } else if (err.request) {
           errorMessage = "No response from server. Check backend and network.";
-        } else { // Something else happened
+        } else {
           errorMessage = err.message || "An unknown error occurred during fetching.";
         }
         setError(errorMessage);
-        setFeedPosts([]); // Clear posts on error
+        setFeedPosts([]);
       } finally {
         setIsLoading(false);
-        console.log("HomePage useEffect: Fetching finished. isLoading:", false);
+        console.log("HomePage useEffect: Fetching finished.");
       }
     };
 
     fetchFeedPosts();
-  }, [API_BASE_URL]); // Dependency array
+  }, [API_BASE_URL]);
 
-  console.log("HomePage render: isLoading:", isLoading, "error:", error, "feedPosts count:", feedPosts.length);
+  // Function to handle when a post is clicked in Photobuble
+  const handlePostClick = async (postData) => {
+    console.log("Post clicked in Photobuble, opening modal for:", postData);
+    setSelectedPostForModal(postData); // Set the full post data
+
+    if (postData && postData.userId) {
+      try {
+        setAuthorDetails(null); // Clear previous author details, show loading state in modal
+        console.log(`Fetching author details for userId: ${postData.userId}`);
+        const userResponse = await axios.get(`${API_BASE_URL}/api/users/${postData.userId}`);
+        if (userResponse.data) {
+          console.log("Author details fetched for modal:", userResponse.data);
+          setAuthorDetails(userResponse.data);
+        } else {
+          console.warn("No data returned for author for modal.");
+          setAuthorDetails({ username: 'Unknown User', profilePicture: '' }); // Fallback
+        }
+      } catch (err) {
+        console.error("Error fetching author details for modal:", err);
+        setAuthorDetails({ username: 'User N/A', profilePicture: '' }); // Error fallback
+      }
+    } else {
+      console.warn("Clicked post data is missing userId, cannot fetch author for modal.");
+      // If the author is the current user, we can use their details directly
+      if (currentUser && postData && postData.userId === currentUser._id) {
+        setAuthorDetails(currentUser);
+      } else {
+        setAuthorDetails({ username: 'Author Info Unavailable', profilePicture: '' });
+      }
+    }
+  };
+
+  const handleCloseModal = () => {
+    setSelectedPostForModal(null);
+    setAuthorDetails(null);
+  };
 
   return (
     <>
@@ -87,20 +131,26 @@ function HomePage() {
       </div>
 
       <div className="mt-6 sm:mt-8 px-2 sm:px-4">
-        {isLoading && <div className="w-full text-center py-10">Loading photos... (HomePage)</div>}
-        {error && <div className="w-full text-center py-10 text-red-500">Error loading feed (HomePage): {error}</div>}
+        {isLoading && <div className="w-full text-center py-10 text-gray-500">Loading photos...</div>}
+        {error && <div className="w-full text-center py-10 text-red-500">Error: {error}</div>}
         {!isLoading && !error && (
-          <>
-            {console.log("HomePage render: Passing to Photobuble, data length:", feedPosts.length, "First item (if any):", feedPosts[0])}
-            {/* Use the Photobuble version that you confirmed works with static data */}
-            <Photobuble data={feedPosts} />
-          </>
+          <Photobuble data={feedPosts} onItemClick={handlePostClick} />
         )}
          {!isLoading && !error && feedPosts.length === 0 && (
-          <div className="w-full text-center py-10">No photos to display yet. (HomePage)</div>
+          <div className="w-full text-center py-10 text-gray-500">No photos to display yet.</div>
         )}
       </div>
       <DynamicActionBar />
+
+      {/* Render the modal conditionally */}
+      {selectedPostForModal && (
+        <DetailedPostModal
+          post={selectedPostForModal}
+          author={authorDetails}
+          currentUser={currentUser} // Pass current user for like status, etc.
+          onClose={handleCloseModal}
+        />
+      )}
     </>
   );
 }
