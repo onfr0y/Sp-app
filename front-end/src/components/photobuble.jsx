@@ -1,6 +1,6 @@
 // src/components/photobuble.jsx
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { useTransition, a } from '@react-spring/web';
+import { useTransition,  } from '@react-spring/web';
 
 // Simple debounce function helper
 function debounce(func, wait) {

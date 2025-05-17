@@ -1,7 +1,7 @@
 // src/components/DetailedPostModal.jsx
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useSpring, animated, config } from '@react-spring/web';
+import { useSpring, config } from '@react-spring/web';
 
 // --- Icon Components (Adjust colors for light theme) ---
 const BackArrowIcon = () => <svg className="w-6 h-6 text-gray-700 hover:text-black dark:text-gray-300 dark:hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path></svg>;
