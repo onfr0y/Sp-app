@@ -3,7 +3,7 @@ import React, { createContext, useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom'; // If you want to navigate from context functions
 
 // API URL for login
-const API_URL = 'http://localhost:3000/api/auth'; // Adjust as needed
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';  // Adjust as needed
 
 // Create the context
 const AuthContext = createContext(null);
