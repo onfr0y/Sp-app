@@ -3,7 +3,7 @@ import React, { createContext, useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom'; // If you want to navigate from context functions
 
 // API URL for login
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';  // Adjust as needed
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/auth';// Adjust as needed
 
 // Create the context
 const AuthContext = createContext(null);
@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${API_URL}/login`, {
+      const response = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -90,7 +90,7 @@ export const AuthProvider = ({ children }) => {
     setAuthToken(null);
     setCurrentUser(null);
     console.log('AuthProvider: User logged out.');
-    navigate('/login'); // Navigate to login page after logout
+    navigate('api/auth/login'); // Navigate to login page after logout
   };
 
   // The value provided to consuming components
