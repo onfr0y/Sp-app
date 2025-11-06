@@ -31,7 +31,7 @@ const __dirname = path.dirname(__filename);
 console.log("SERVER_SETUP: Configuring middleware...");
 
 // 1. CORS
-const clientOrigin = process.env.CLIENT_ORIGIN || 'https://Sp-app.onrender.com';
+const clientOrigin = process.env.CLIENT_ORIGIN || 'https://sp-app-fe.vercel.app';
 app.use(cors({
   origin: clientOrigin,
   credentials: true,
